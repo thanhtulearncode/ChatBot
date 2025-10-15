@@ -1,0 +1,103 @@
+[
+    {
+        "id": 1,
+        "category": "compte",
+        "question": "Comment créer un compte utilisateur ?",
+        "answer": "Pour créer un compte, rendez-vous sur la page d'inscription, remplissez le formulaire avec votre email et mot de passe, puis validez votre compte via l'email de confirmation."
+    },
+    {
+        "id": 2,
+        "category": "compte",
+        "question": "J'ai oublié mon mot de passe, que faire ?",
+        "answer": "Sur la page de connexion, cliquez sur 'Mot de passe oublié'. Entrez votre email et vous recevrez un lien de réinitialisation dans les 5 minutes."
+    },
+    {
+        "id": 3,
+        "category": "paiement",
+        "question": "Quels moyens de paiement acceptez-vous ?",
+        "answer": "Nous acceptons les cartes bancaires (Visa, Mastercard, Amex), PayPal, Apple Pay et les virements SEPA pour les montants supérieurs à 500€."
+    },
+    {
+        "id": 4,
+        "category": "livraison",
+        "question": "Quel est le délai de livraison standard ?",
+        "answer": "Le délai de livraison standard est de 3 à 5 jours ouvrés en France métropolitaine. Livraison express disponible en 24-48h pour 9,90€ supplémentaires."
+    },
+    {
+        "id": 5,
+        "category": "support",
+        "question": "Comment contacter le service client ?",
+        "answer": "Notre service client est disponible par email à support@example.com, par téléphone au 01 23 45 67 89 (lun-ven 9h-18h) ou via le chat en direct sur notre site."
+    },
+    {
+        "id": 6,
+        "category": "produit",
+        "question": "Puis-je retourner un produit ?",
+        "answer": "Oui, vous disposez de 30 jours pour retourner un produit non utilisé dans son emballage d'origine. Les frais de retour sont à votre charge sauf en cas de défaut."
+    },
+    {
+        "id": 7,
+        "category": "abonnement",
+        "question": "Comment fonctionne l'abonnement premium ?",
+        "answer": "L'abonnement Premium coûte 9,99€/mois et offre la livraison gratuite illimitée, un accès prioritaire aux ventes et des réductions exclusives de 10% sur tous les produits."
+    },
+    {
+        "id": 8,
+        "category": "sécurité",
+        "question": "Mes données personnelles sont-elles sécurisées ?",
+        "answer": "Absolument. Nous utilisons un cryptage SSL 256 bits, nos serveurs sont certifiés ISO 27001, et nous sommes conformes au RGPD. Vos données ne sont jamais vendues à des tiers."
+    },
+    {
+        "id": 9,
+        "category": "livraison",
+        "question": "Livrez-vous à l'international ?",
+        "answer": "Oui, nous livrons dans plus de 50 pays. Les frais et délais varient selon la destination. Consultez notre page 'Livraison internationale' pour plus de détails."
+    },
+    {
+        "id": 10,
+        "category": "produit",
+        "question": "Comment suivre ma commande ?",
+        "answer": "Dès l'expédition, vous recevez un email avec un numéro de suivi. Vous pouvez suivre votre colis en temps réel depuis votre espace client ou sur le site du transporteur."
+    },
+    {"id": 11, "category": "compte", "question": "Puis-je modifier mon adresse email ?", "answer": "Oui, rendez-vous dans votre espace personnel, section 'Informations du compte', puis cliquez sur 'Modifier l'email'."},
+    {"id": 12, "category": "compte", "question": "Comment supprimer mon compte ?", "answer": "Contactez le support via le formulaire de contact en précisant votre demande de suppression. Un email de confirmation vous sera envoyé."},
+    {"id": 13, "category": "compte", "question": "Puis-je avoir plusieurs comptes avec la même adresse email ?", "answer": "Non, une adresse email ne peut être associée qu'à un seul compte utilisateur."},
+    {"id": 14, "category": "paiement", "question": "Les paiements sont-ils sécurisés ?", "answer": "Oui, tous les paiements sont traités via des plateformes sécurisées et cryptées."},
+    {"id": 15, "category": "paiement", "question": "Puis-je payer en plusieurs fois ?", "answer": "Le paiement en 3x sans frais est disponible pour toute commande supérieure à 150€. Choisissez l'option lors du paiement."},
+    {"id": 16, "category": "paiement", "question": "Où trouver ma facture ?", "answer": "Vos factures sont disponibles dans votre espace client, rubrique 'Commandes'."},
+    {"id": 17, "category": "livraison", "question": "Comment modifier mon adresse de livraison ?", "answer": "Vous pouvez modifier votre adresse avant l'expédition depuis votre espace client, section 'Adresses'."},
+    {"id": 18, "category": "livraison", "question": "Que faire si mon colis est perdu ?", "answer": "Contactez notre service client avec votre numéro de commande. Nous ouvrirons une enquête auprès du transporteur."},
+    {"id": 19, "category": "livraison", "question": "Proposez-vous la livraison en point relais ?", "answer": "Oui, la livraison en point relais est disponible lors du choix du mode de livraison."},
+    {"id": 20, "category": "produit", "question": "Comment obtenir une facture pour mon achat ?", "answer": "Une facture est envoyée par email après chaque achat et reste accessible dans votre espace client."},
+    {"id": 21, "category": "produit", "question": "Les produits sont-ils garantis ?", "answer": "Oui, tous nos produits bénéficient d'une garantie légale de 2 ans."},
+    {"id": 22, "category": "produit", "question": "Comment signaler un produit défectueux ?", "answer": "Contactez le support avec une photo du produit et votre numéro de commande. Nous vous indiquerons la marche à suivre."},
+    {"id": 23, "category": "abonnement", "question": "Comment résilier mon abonnement ?", "answer": "Vous pouvez résilier à tout moment depuis votre espace client, rubrique 'Abonnement'."},
+    {"id": 24, "category": "abonnement", "question": "Puis-je changer de formule d'abonnement ?", "answer": "Oui, il est possible de passer d'une formule à une autre depuis votre espace client."},
+    {"id": 25, "category": "abonnement", "question": "L'abonnement est-il sans engagement ?", "answer": "Oui, vous pouvez résilier à tout moment sans frais."},
+    {"id": 26, "category": "support", "question": "Quels sont les horaires du support ?", "answer": "Notre support est disponible du lundi au vendredi de 9h à 18h (hors jours fériés)."},
+    {"id": 27, "category": "support", "question": "Avez-vous une FAQ technique ?", "answer": "Oui, consultez notre rubrique 'Aide & Support' pour des guides et tutoriels techniques."},
+    {"id": 28, "category": "support", "question": "Comment donner mon avis sur un produit ?", "answer": "Après réception de votre commande, vous recevrez un email pour laisser un avis ou vous pouvez le faire depuis la fiche produit."},
+    {"id": 29, "category": "technique", "question": "Je rencontre un bug sur le site, que faire ?", "answer": "Essayez de vider le cache de votre navigateur. Si le problème persiste, contactez le support avec une capture d'écran."},
+    {"id": 30, "category": "technique", "question": "Quels navigateurs sont compatibles ?", "answer": "Notre site est compatible avec Chrome, Firefox, Edge, Safari et Opera (versions récentes)."},
+    {"id": 31, "category": "technique", "question": "Comment activer les notifications ?", "answer": "Activez les notifications dans les paramètres de votre compte ou via le pop-up lors de votre première visite."},
+    {"id": 32, "category": "confidentialité", "question": "Comment exercer mon droit d'accès à mes données ?", "answer": "Envoyez une demande à privacy@example.com avec une copie de votre pièce d'identité."},
+    {"id": 33, "category": "confidentialité", "question": "Puis-je demander la suppression de mes données ?", "answer": "Oui, faites-en la demande via votre espace client ou par email à privacy@example.com."},
+    {"id": 34, "category": "confidentialité", "question": "Combien de temps mes données sont-elles conservées ?", "answer": "Vos données sont conservées pendant la durée légale nécessaire, puis supprimées ou anonymisées."},
+    {"id": 35, "category": "application", "question": "Avez-vous une application mobile ?", "answer": "Oui, notre application est disponible sur iOS et Android. Téléchargez-la depuis l'App Store ou Google Play."},
+    {"id": 36, "category": "application", "question": "Comment se connecter à l'application mobile ?", "answer": "Utilisez les mêmes identifiants que sur le site web."},
+    {"id": 37, "category": "application", "question": "L'application mobile est-elle gratuite ?", "answer": "Oui, l'application est gratuite. Certaines fonctionnalités sont réservées aux abonnés Premium."},
+    {"id": 38, "category": "sécurité", "question": "Comment signaler une tentative de phishing ?", "answer": "Transférez l'email suspect à abuse@example.com. Nous enquêterons rapidement."},
+    {"id": 39, "category": "sécurité", "question": "Comment choisir un mot de passe sécurisé ?", "answer": "Utilisez au moins 12 caractères, mélangez lettres, chiffres et symboles, et évitez les mots du dictionnaire."},
+    {"id": 40, "category": "sécurité", "question": "Proposez-vous l'authentification à deux facteurs ?", "answer": "Oui, activez-la dans les paramètres de sécurité de votre compte."},
+    {"id": 41, "category": "commande", "question": "Comment annuler une commande ?", "answer": "Vous pouvez annuler une commande tant qu'elle n'est pas expédiée, depuis votre espace client."},
+    {"id": 42, "category": "commande", "question": "Puis-je modifier une commande après validation ?", "answer": "Contactez rapidement le support. Si la commande n'est pas encore traitée, une modification est possible."},
+    {"id": 43, "category": "commande", "question": "Je n'ai pas reçu ma commande, que faire ?", "answer": "Vérifiez le suivi colis. Si besoin, contactez le support avec votre numéro de commande."},
+    {"id": 44, "category": "newsletter", "question": "Comment m'abonner à la newsletter ?", "answer": "Inscrivez-vous via le formulaire en bas de page ou dans votre espace client."},
+    {"id": 45, "category": "newsletter", "question": "Comment me désabonner de la newsletter ?", "answer": "Cliquez sur le lien de désinscription présent en bas de chaque newsletter."},
+    {"id": 46, "category": "newsletter", "question": "Quels avantages à s'abonner à la newsletter ?", "answer": "Vous recevez des offres exclusives, des nouveautés et des conseils personnalisés."},
+    {"id": 47, "category": "programme fidélité", "question": "Comment fonctionne le programme de fidélité ?", "answer": "À chaque achat, cumulez des points à échanger contre des réductions ou des cadeaux."},
+    {"id": 48, "category": "programme fidélité", "question": "Comment utiliser mes points fidélité ?", "answer": "Vos points sont utilisables lors du paiement, en sélectionnant l'option correspondante."},
+    {"id": 49, "category": "programme fidélité", "question": "Mes points fidélité expirent-ils ?", "answer": "Oui, les points sont valables 12 mois à compter de la date d'obtention."},
+    {"id": 50, "category": "général", "question": "Où trouver vos conditions générales de vente ?", "answer": "Elles sont consultables en bas de page, rubrique 'CGV'."},
+    {"id": 51, "category": "général", "question": "Comment contacter le DPO (délégué à la protection des données) ?", "answer": "Envoyez un email à dpo@example.com pour toute question relative à la protection des données."}
+]

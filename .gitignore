@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+
+# Virtual environments
+env/
+.venv/
+venv/
+ENV/
+
+# Cache and data
+cache/
+*.pkl
+*.db
+*.sqlite3
+
+# Logs
+*.log
+
+# Environment variables
+.env
+.env.*
+
+# Backup
+*.backup
+
+
+
+
+

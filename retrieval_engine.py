@@ -1,6 +1,5 @@
 """
-Retrieval Engine
-Utilise SentenceTransformer pour faire correspondre les requêtes aux FAQ.
+Retrieval Engine - Recherche sémantique avec SentenceTransformer
 """
 import json
 import pickle
@@ -17,34 +16,30 @@ logger = logging.getLogger(__name__)
 
 RECOMMENDED_MODEL = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
 
-class RetrievalEngine:
-    """Retrieval basé sur embeddings avec cache et hybrid matching (questions + réponses)."""
 
+class RetrievalEngine:
+    """Retrieval basé sur embeddings avec cache et hybrid matching"""
     def __init__(self, faq_path: str, model_name: str = RECOMMENDED_MODEL):
         self.faq_path = faq_path
         self.model = SentenceTransformer(model_name)
-
         self.faq_data: List[Dict] = []
         self.question_embeddings: Optional[np.ndarray] = None
         self.answer_embeddings: Optional[np.ndarray] = None
-
         self.stats = {
             "total_queries": 0,
             "high_confidence": 0,
             "medium_confidence": 0,
             "low_confidence": 0
         }
-
         self.query_cache: Dict[str, np.ndarray] = {}
         self.cache_hits = 0
         self.cache_misses = 0
         self.cache_path = Path("cache/embeddings_cache.pkl")
-
         self.load_and_index()
         self.load_cache()
 
     def load_and_index(self):
-        """Charge la FAQ et crée les embeddings des questions et réponses."""
+        """Charge la FAQ et crée les embeddings"""
         logger.info(f"Chargement de la FAQ depuis {self.faq_path}")
         try:
             with open(self.faq_path, "r", encoding="utf-8") as f:
@@ -71,29 +66,29 @@ class RetrievalEngine:
 
     @staticmethod
     def cosine_similarity(vec1: np.ndarray, vec2: np.ndarray) -> float:
-        """Calcule la similarité cosinus entre deux vecteurs."""
+        """Calcule la similarité cosinus entre deux vecteurs"""
         dot = np.dot(vec1, vec2)
         norm = np.linalg.norm(vec1) * np.linalg.norm(vec2)
         return float(dot / norm) if norm else 0.0
 
     @staticmethod
     def normalize_query(query: str) -> str:
-        """Nettoie la requête utilisateur."""
+        """Nettoie la requête utilisateur"""
         query = re.sub(r"[^\w\sàâäéèêëïîôùûüÿçÀÂÄÉÈÊËÏÎÔÙÛÜŸÇ-]", " ", query)
         return re.sub(r"\s+", " ", query).strip()
 
     @staticmethod
     def is_too_short(text: str) -> bool:
-        """Vérifie si le texte est trop court pour être significatif."""
+        """Vérifie si le texte est trop court"""
         words = text.strip().split()
         return len(words) < 2 or len(text.strip()) < 5
 
     def _hash_text(self, text: str) -> str:
-        """Crée un hash pour le cache."""
+        """Crée un hash pour le cache"""
         return hashlib.md5(text.encode()).hexdigest()
 
     def encode_with_cache(self, text: str) -> np.ndarray:
-        """Encode un texte avec cache local."""
+        """Encode un texte avec cache local"""
         text_hash = self._hash_text(text)
         if text_hash in self.query_cache:
             self.cache_hits += 1
@@ -103,26 +98,28 @@ class RetrievalEngine:
         embedding = self.model.encode(text, convert_to_numpy=True)
 
         if len(self.query_cache) > 1000:
-            self.query_cache.pop(next(iter(self.query_cache)))  # FIFO
+            self.query_cache.pop(next(iter(self.query_cache)))
 
         self.query_cache[text_hash] = embedding
         return embedding
 
-    def get_best_match(
-        self, query: str, context_history: Optional[List[Dict]] = None, threshold: float = 0.45
-    ) -> Dict:
-        """Trouve la meilleure correspondance dans la FAQ."""
+    def get_best_match(self, query: str, context_history: Optional[List[Dict]] = None, threshold: float = 0.45) -> Dict:
+        """Trouve la meilleure correspondance dans la FAQ"""
         self.stats["total_queries"] += 1
         query = self.normalize_query(query)
 
         if not self.faq_data or self.question_embeddings is None:
             return {"answer": "Base de connaissances indisponible.", "confidence": 0.0, "matched_question": None}
 
-        q_lower = query.lower()
-        if q_lower in {"bonjour", "hello", "salut", "hi", "bonsoir"}:
+        q_lower = query.lower().strip()
+
+        greetings = {"bonjour", "hello", "salut", "hi", "bonsoir", "coucou"}
+        short_acknowledgments = {"ok", "oui", "non", "merci", "d'accord", "bien", "parfait", "super"}
+
+        if q_lower in greetings:
             return {"answer": "Bonjour ! Comment puis-je vous aider ?", "confidence": 1.0, "matched_question": None}
-        if q_lower in {"ok", "oui", "non", "merci", "d’accord", "bien"}:
-            return {"answer": "Souhaitez-vous plus de précisions ?", "confidence": 1.0, "matched_question": None}
+        if q_lower in short_acknowledgments:
+            return {"answer": "Très bien ! Avez-vous d'autres questions ?", "confidence": 1.0, "matched_question": None}
         if self.is_too_short(query):
             return {"answer": "Pouvez-vous préciser votre question ?", "confidence": 0.0, "matched_question": None}
 
@@ -138,7 +135,6 @@ class RetrievalEngine:
         scores.sort(key=lambda x: x[1], reverse=True)
         best_idx, best_score = scores[0]
 
-        # Statistiques de confiance
         if best_score > 0.7:
             self.stats["high_confidence"] += 1
         elif best_score > 0.45:
@@ -157,7 +153,7 @@ class RetrievalEngine:
         suggestion_text = "\n".join(f"• {q}" for q in top_suggestions)
         return {
             "answer": (
-                "Je n’ai pas trouvé de réponse précise à votre question.\n"
+                "Je n'ai pas trouvé de réponse précise à votre question.\n"
                 f"Voici quelques suggestions :\n{suggestion_text}"
             ),
             "confidence": float(best_score),
@@ -165,7 +161,7 @@ class RetrievalEngine:
         }
 
     def get_top_k_matches(self, query: str, k: int = 3) -> List[Dict]:
-        """Retourne les k meilleures correspondances."""
+        """Retourne les k meilleures correspondances"""
         if not self.faq_data or self.question_embeddings is None:
             return []
 
@@ -187,11 +183,11 @@ class RetrievalEngine:
         return hybrid_scores[:k]
 
     def get_stats(self) -> Dict:
-        """Retourne les statistiques d’utilisation."""
+        """Retourne les statistiques d'utilisation"""
         return self.stats
 
     def get_cache_stats(self) -> Dict:
-        """Retourne les statistiques du cache."""
+        """Retourne les statistiques du cache"""
         total = self.cache_hits + self.cache_misses
         hit_rate = (self.cache_hits / total * 100) if total else 0
         return {
@@ -202,14 +198,14 @@ class RetrievalEngine:
         }
 
     def save_cache(self):
-        """Sauvegarde le cache sur disque."""
+        """Sauvegarde le cache sur disque"""
         self.cache_path.parent.mkdir(exist_ok=True)
         with open(self.cache_path, "wb") as f:
             pickle.dump(self.query_cache, f)
         logger.info(f"Cache sauvegardé ({len(self.query_cache)} entrées).")
 
     def load_cache(self):
-        """Charge le cache depuis le disque."""
+        """Charge le cache depuis le disque"""
         if not self.cache_path.exists():
             self.query_cache = {}
             return

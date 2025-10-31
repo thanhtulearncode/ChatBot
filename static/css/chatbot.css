@@ -1,0 +1,246 @@
+@import url("theme.css");
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Segoe UI", Roboto, sans-serif;
+  background: var(--foreground-color);
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.container {
+  width: 90%;
+  max-width: 700px;
+  height: 85vh;
+  background: var(--foreground-color);
+  border-radius: 20px;
+  border: 1px solid var(--p-200);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.header {
+  background: var(--main-gradient-color);
+  color: white;
+  padding: 20px;
+  text-align: center;
+}
+
+.header h1 {
+  font-size: var(--h1-font-size);
+  line-height: var(--h1-line-height);
+  margin-bottom: 5px;
+}
+
+.header p {
+  font-size: var(--caption-font-size);
+  opacity: 0.9;
+}
+
+.llm-badge {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 11px;
+  margin-top: 8px;
+  font-weight: bold;
+}
+
+.controls {
+  padding: 12px 20px;
+  background: var(--n-50);
+  border-bottom: 1px solid var(--p-100);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.switch-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: var(--caption-font-size);
+}
+
+.switch {
+  position: relative;
+  width: 50px;
+  height: 24px;
+}
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+  border-radius: 24px;
+}
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+input:checked + .slider {
+  background-color: var(--p-500);
+}
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
+
+#clearChatBtn {
+  padding: 6px 16px;
+  border: 1px solid var(--p-200);
+  border-radius: 15px;
+  background: white;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background 0.3s;
+}
+#clearChatBtn:hover {
+  background: var(--p-100);
+}
+
+.chat-box {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  background: var(--n-50);
+}
+
+.message {
+  margin-bottom: 15px;
+  animation: fadeIn 0.3s;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.message.user {
+  text-align: right;
+}
+.message-content {
+  display: inline-block;
+  padding: 12px 18px;
+  border-radius: 18px;
+  max-width: 80%;
+  word-wrap: break-word;
+  font-size: var(--p-font-size);
+}
+.user .message-content {
+  background: var(--p-500);
+  color: white;
+}
+.bot .message-content {
+  background: white;
+  color: var(--p-900);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.message-meta {
+  font-size: 11px;
+  color: var(--n-500);
+  margin-top: 5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.user .message-meta {
+  justify-content: flex-end;
+}
+
+.confidence-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: bold;
+}
+.provider-badge {
+  background: var(--p-500);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.input-area {
+  padding: 20px;
+  background: white;
+  border-top: 1px solid var(--p-100);
+  display: flex;
+  gap: 10px;
+}
+#userInput {
+  flex: 1;
+  padding: 12px 18px;
+  border: 2px solid var(--p-100);
+  border-radius: 25px;
+  font-size: var(--p-font-size);
+  outline: none;
+  transition: border-color 0.3s;
+}
+#userInput:focus {
+  border-color: var(--p-500);
+}
+#sendBtn {
+  padding: 12px 30px;
+  background: var(--main-gradient-color);
+  color: white;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: transform 0.2s;
+}
+#sendBtn:hover {
+  transform: scale(1.05);
+}
+#sendBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.loading {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--p-500);
+  animation: bounce 1.4s infinite ease-in-out;
+}
+@keyframes bounce {
+  0%,
+  80%,
+  100% {
+    transform: scale(0);
+  }
+  40% {
+    transform: scale(1);
+  }
+}

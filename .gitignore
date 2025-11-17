@@ -27,6 +27,7 @@ cache/
 # Backup
 *.backup
 
+data/new_questions.json
 
 
 

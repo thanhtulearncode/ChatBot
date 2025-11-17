@@ -1,0 +1,134 @@
+.chatbot-header {
+  background: var(--bg-header);
+  color: var(--text-inverse);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.avatar-container {
+  position: relative;
+}
+
+.avatar {
+  width: 48px;
+  height: 48px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  overflow: hidden;
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  display: block;
+}
+
+/* Fallback if image fails to load */
+.avatar img[src=""],
+.avatar img:not([src]) {
+  display: none;
+}
+
+.avatar::before {
+  content: "🤖";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 24px;
+  display: none;
+}
+
+.avatar:has(img[src=""])::before,
+.avatar:not(:has(img))::before {
+  display: block;
+}
+
+.status-indicator {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 12px;
+  height: 12px;
+  background: var(--success);
+  border: 2px solid var(--bg-primary);
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.1);
+  }
+}
+
+.header-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.chatbot-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.chatbot-subtitle {
+  font-size: 0.875rem;
+  opacity: 0.9;
+  margin: 0;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+}
+
+.llm-status {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  background: rgba(255, 255, 255, 0.15);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--border-radius);
+  backdrop-filter: blur(10px);
+  font-size: 0.8125rem;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--success);
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+.status-text {
+  font-weight: 500;
+}

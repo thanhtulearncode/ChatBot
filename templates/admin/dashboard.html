@@ -1,0 +1,50 @@
+{% extends "admin/base.html" %} {% block admin_content %}
+<h1>Tableau de Bord</h1>
+
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-info">
+      <h3>Total Interactions</h3>
+      <div class="stat-value">{{ stats['total_messages'] }}</div>
+    </div>
+    <div
+      class="stat-icon"
+      style="background: rgba(99, 102, 241, 0.1); color: var(--primary)"
+    >
+      💬
+    </div>
+  </div>
+</div>
+
+<div class="table-container">
+  <div class="table-header">
+    <h2>🔍 Questions à faible confiance</h2>
+  </div>
+  {% if stats['recent_missed'] %}
+  <table>
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Question</th>
+        <th>Réponse</th>
+        <th>Confiance</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in stats['recent_missed'] %}
+      <tr>
+        <td>{{ item.timestamp.strftime('%d/%m %H:%M') }}</td>
+        <td>{{ item.message }}</td>
+        <td>{{ item.response }}</td>
+        <td>
+          <span class="badge badge-low"
+            >{{ (item.confidence * 100)|round }}%</span
+          >
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+</div>
+{% endblock %}

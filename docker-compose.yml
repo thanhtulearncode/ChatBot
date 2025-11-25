@@ -1,0 +1,19 @@
+version: "3.8"
+
+services:
+  chatbot:
+    build: .
+    container_name: chatbot_rag_app
+    ports:
+      - "8000:8000"
+    volumes:
+      # ON MONTE TOUT LE DOSSIER DATA (plus sûr)
+      - ./data:/app/data
+      # Persistance du cache
+      - ./cache:/app/cache
+    env_file:
+      - .env
+    environment:
+      # On pointe la DB à l'intérieur du dossier data
+      - DATABASE_URL=sqlite:////app/data/chatbot_production.db
+    restart: unless-stopped

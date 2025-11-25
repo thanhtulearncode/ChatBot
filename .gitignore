@@ -22,7 +22,6 @@ cache/
 
 # Environment variables
 .env
-.env.*
 
 # Backup
 *.backup

@@ -1,0 +1,16 @@
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env
+venv
+.venv
+pip-log.txt
+pip-delete-this-directory.txt
+.coverage
+.tox
+.pytest_cache
+.mypy_cache
+chatbot_data.db
+chatbot_production.db

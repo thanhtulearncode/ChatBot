@@ -1,0 +1,108 @@
+{% extends "admin/base.html" %} {% block admin_content %}
+<div class="page-header">
+  <h1>Base de Connaissances</h1>
+  <button class="btn-primary" onclick="openModal()">
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+    >
+      <line x1="12" y1="5" x2="12" y2="19"></line>
+      <line x1="5" y1="12" x2="19" y2="12"></line>
+    </svg>
+    Ajouter une question
+  </button>
+</div>
+
+<div class="faq-list">
+  {% for item in faqs %}
+  <div class="faq-card">
+    <div class="faq-content">
+      <h3>{{ item.question }}</h3>
+      <p>{{ item.answer }}</p>
+      <div class="faq-meta">
+        <span class="category-badge">{{ item.category }}</span>
+        <span>ID: {{ item.id }}</span>
+      </div>
+    </div>
+    <form
+      action="/admin/faq/delete/{{ item.id }}"
+      method="post"
+      onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette question ?');"
+    >
+      <button type="submit" class="btn-danger" title="Supprimer">
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <polyline points="3 6 5 6 21 6"></polyline>
+          <path
+            d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+          ></path>
+        </svg>
+      </button>
+    </form>
+  </div>
+  {% else %}
+  <div style="text-align: center; padding: 60px; color: var(--text-secondary)">
+    <div style="font-size: 3rem; margin-bottom: 16px">📭</div>
+    <p style="font-size: 1.1rem; font-weight: 500">
+      Aucune question dans la base de données.
+    </p>
+    <p style="font-size: 0.9rem">Commencez par en ajouter une !</p>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="modal-overlay" id="addModal">
+  <div class="modal">
+    <h2>Nouvelle Question</h2>
+    <form action="/admin/faq/add" method="post">
+      <div class="form-group">
+        <label>Question</label>
+        <input
+          type="text"
+          name="question"
+          required
+          placeholder="Ex: Quels sont vos horaires ?"
+        />
+      </div>
+      <div class="form-group">
+        <label>Réponse</label>
+        <textarea
+          name="answer"
+          rows="4"
+          required
+          placeholder="Ex: Nous sommes ouverts du lundi au vendredi..."
+        ></textarea>
+      </div>
+      <div class="form-group">
+        <label>Catégorie</label>
+        <select name="category">
+          <option value="general">Général</option>
+          <option value="technique">Technique</option>
+          <option value="compte">Compte</option>
+          <option value="paiement">Paiement</option>
+          <option value="livraison">Livraison</option>
+          <option value="support">Support</option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" onclick="closeModal()">
+          Annuler
+        </button>
+        <button type="submit" class="btn-primary">Enregistrer</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %} {% block scripts %}
+<script src="/static/js/faq.js"></script>
+{% endblock %}

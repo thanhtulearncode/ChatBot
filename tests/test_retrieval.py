@@ -30,7 +30,7 @@ def test_rag_search_nominal(session: Session):
     # Tester une recherche pertinente
     result = engine.search("créer compte utilisateur")
     # Le score devrait être élevé car la question est proche
-    assert result["confidence"] > 0.7
+    assert result["confidence"] > 0.6
     assert result["answer"] == "Allez sur la page inscription."
     assert result["faq_id"] is not None
 

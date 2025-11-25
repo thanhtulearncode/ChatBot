@@ -65,7 +65,7 @@ class RAGService:
 
         # Gestion des réponses statiques (règles métier)
         greetings = {"bonjour", "hello", "salut", "hi", "bonsoir", "coucou"}
-        short_acknowledgments = {"ok", "oui", "non", "merci", "d'accord", "bien", "parfait", "super"}
+        short_acknowledgments = {"ok", "oui", "non", "merci", "merci beaucoup", "d'accord", "bien", "parfait", "super"}
 
         if q_lower in greetings:
             return {

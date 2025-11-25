@@ -1,66 +1,44 @@
 import pytest
-import numpy as np
-from retrieval_engine import RetrievalEngine
-import json
-import tempfile
-import os
+from sqlmodel import Session
+from app.services.rag_engine import RAGService
+from app.db.models import FAQItem
 
-@pytest.fixture
-def temp_faq_file():
-    """Crée une FAQ temporaire"""
-    faq = [
-        {"id": 1, "question": "Comment créer un compte ?", "answer": "Réponse 1"},
-        {"id": 2, "question": "Prix de l'abonnement ?", "answer": "Réponse 2"},
-        {"id": 3, "question": "Livraison internationale ?", "answer": "Réponse 3"}
-    ]
-    with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json') as f:
-        json.dump(faq, f)
-        temp_path = f.name
-    yield temp_path
-    os.unlink(temp_path)
+def test_rag_static_rules():
+    """Vérifie que les règles statiques (Bonjour, etc.) fonctionnent sans DB."""
+    engine = RAGService()
+    # Test Bonjour
+    result = engine.search("Bonjour")
+    assert result["confidence"] == 1.0
+    assert "aider" in result["answer"]
+    assert result["provider"] == "static_rule"
+    # Test Merci
+    result = engine.search("Merci beaucoup")
+    assert result["confidence"] == 1.0
+    assert "questions" in result["answer"]
 
+def test_rag_search_nominal(session: Session):
+    """Vérifie la recherche vectorielle avec des données en base."""
+    # Peupler la base de test
+    faq1 = FAQItem(question="Comment créer un compte ?", answer="Allez sur la page inscription.")
+    faq2 = FAQItem(question="Quel est le prix ?", answer="C'est 10 euros.")
+    session.add(faq1)
+    session.add(faq2)
+    session.commit()
+    # Recharger le moteur RAG (synchronisation avec la DB)
+    engine = RAGService()
+    engine.reload_from_db(session)
+    # Tester une recherche pertinente
+    result = engine.search("créer compte utilisateur")
+    # Le score devrait être élevé car la question est proche
+    assert result["confidence"] > 0.7
+    assert result["answer"] == "Allez sur la page inscription."
+    assert result["faq_id"] is not None
 
-def test_retrieval_initialization(temp_faq_file):
-    """Test l'initialisation du retrieval engine"""
-    engine = RetrievalEngine(
-        faq_path=temp_faq_file,
-        model_name="sentence-transformers/all-MiniLM-L6-v2"
-    )
-    assert len(engine.faq_data) == 3
-    assert engine.question_embeddings is not None
-    assert engine.question_embeddings.shape[0] == 3
-
-
-def test_cosine_similarity(temp_faq_file):
-    """Test le calcul de similarité cosinus"""
-    engine = RetrievalEngine(temp_faq_file, "sentence-transformers/all-MiniLM-L6-v2")
-    vec1 = np.array([1.0, 0.0, 0.0])
-    vec2 = np.array([1.0, 0.0, 0.0])
-    sim = engine.cosine_similarity(vec1, vec2)
-    assert abs(sim - 1.0) < 0.01  # Vecteurs identiques
-
-
-def test_get_best_match(temp_faq_file):
-    """Test la recherche de meilleure correspondance"""
-    engine = RetrievalEngine(temp_faq_file, "sentence-transformers/all-MiniLM-L6-v2")
-    result = engine.get_best_match("créer compte utilisateur")
-    assert result["confidence"] > 0.3
-    assert "Réponse 1" in result["answer"]
-    assert result["matched_question"] is not None
-
-
-def test_get_top_k_matches(temp_faq_file):
-    """Test la récupération des top K résultats"""
-    engine = RetrievalEngine(temp_faq_file, "sentence-transformers/all-MiniLM-L6-v2")
-    results = engine.get_top_k_matches("prix livraison", k=2)
-    assert len(results) == 2
-    assert all("confidence" in r for r in results)
-    assert results[0]["confidence"] >= results[1]["confidence"]
-
-
-def test_low_confidence_response(temp_faq_file):
-    """Test la gestion des requêtes sans match"""
-    engine = RetrievalEngine(temp_faq_file, "sentence-transformers/all-MiniLM-L6-v2")
-    result = engine.get_best_match("xyz question totalement aléatoire abc")
-    assert "n'ai pas trouvé" in result["answer"].lower()
-    assert result["matched_question"] is None
+def test_rag_search_no_match(session: Session):
+    """Vérifie le comportement quand rien ne correspond."""
+    engine = RAGService()
+    engine.reload_from_db(session) # RAG vide maintenant
+    result = engine.search("Une question qui n'a aucun sens ici")
+    # Sans données, la confiance doit être 0 ou très basse
+    assert result["confidence"] < 0.5
+    assert result["answer"] is None

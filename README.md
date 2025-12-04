@@ -1,4 +1,4 @@
-# Chatbot RAG : Production Ready
+# Chatbot RAG :
 
 Un assistant intelligent, robuste et modulaire construit avec **FastAPI**. Il combine la recherche sémantique (**RAG**) et la génération par IA (**LLM**) pour fournir des réponses précises et contextuelles.
 

@@ -96,9 +96,20 @@ class RAGService:
         q_lower = clean_query.lower()
 
         # Réponses statiques
-        if q_lower in {"bonjour", "hello", "salut", "hi", "bonsoir", "coucou"}:
+        greetings = {"bonjour", "hello", "salut", "hi", "bonsoir", "coucou"}
+        thanks = {"merci", "thanks", "gratitude"}
+
+        if q_lower in greetings:
             return {
                 "answer": "Bonjour ! Comment puis-je vous aider ?",
+                "confidence": 1.0,
+                "provider": "static_rule",
+                "matched_question": None,
+            }
+
+        if any(t in q_lower for t in thanks):
+            return {
+                "answer": "Je vous en prie ! N'hésitez pas si vous avez d'autres questions.",
                 "confidence": 1.0,
                 "provider": "static_rule",
                 "matched_question": None,

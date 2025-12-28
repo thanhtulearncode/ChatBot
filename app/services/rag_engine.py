@@ -156,6 +156,6 @@ class RAGService:
         # Fallback sous le seuil
         return {
             "answer": None,
-            "confidence": similarity,
+            "confidence": 0.0,
             "matched_question": metadata["original_question"],
         }

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, BackgroundTasks, HTTPException
 from pydantic import BaseModel
 from typing import List, Dict, Any
-from sqlmodel import Session, select, delete
+from sqlmodel import Session, select, delete, desc
 from app.db.session import get_session
 from app.db.models import ChatInteraction
 from app.services.rag_engine import RAGService
@@ -45,61 +45,78 @@ async def chat_endpoint(
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_session)
 ):
-    # Recherche RAG (incluant maintenant les règles statiques Bonjour/Merci)
+    history_items = db.exec(
+        select(ChatInteraction)
+        .where(ChatInteraction.user_session_id == request.user_id)
+        .order_by(desc(ChatInteraction.timestamp))
+        .limit(5)
+    ).all()
+    history_items = history_items[::-1]
+    history_text = "\n".join(
+        [f"User: {h.message}\nAssistant: {h.response}" for h in history_items]
+    ) if history_items else "Aucun historique récent."
+
     rag_result = rag_service.search(request.message, threshold=settings.CONFIDENCE_THRESHOLD)
-    
     response_text = ""
     provider = "retrieval_only"
     confidence = rag_result["confidence"]
     matched_q = rag_result["matched_question"]
-    # Si le moteur RAG a trouvé une règle statique (Bonjour), on l'utilise directement
-    if rag_result.get("provider") == "static_rule":
-        response_text = rag_result["answer"]
-        provider = "static_rule"
-        # La confiance est déjà à 1.0 grâce à la modif dans rag_engine.py
-    else:
-        # Décision : RAG ou LLM ?
-        should_use_llm = request.use_llm and (confidence < 0.65)
-        if not should_use_llm and rag_result["answer"]:
-            # Cas : Réponse trouvée dans la FAQ avec une bonne confiance
-            response_text = rag_result["answer"]
-        else:
-            # Cas : Pas de réponse FAQ ou confiance faible -> Appel LLM
-            context = rag_result["answer"] if rag_result["answer"] else ""
-            
-            prompt = f"""Tu es un assistant support client expert.
-Contexte issu de la base de connaissances : "{context}"
-Question utilisateur : "{request.message}"
+    context_faq = rag_result["answer"] if rag_result["answer"] else ""
 
-Instructions :
-- Si le contexte répond à la question, reformule-le poliment.
-- Si le contexte est vide ou non pertinent, réponds avec tes connaissances générales en restant bref.
-- Réponds en français.
+    if rag_result.get("provider") == "static_rule":
+        return ChatResponse(
+            response=rag_result["answer"],
+            confidence=1.0,
+            provider="static_rule",
+            retrieval_only=True,
+            is_new_question=False
+        )
+    # Cas A : Confiance TRÈS élevée -> FAQ Directe
+    if context_faq and confidence >= settings.DIRECT_ANSWER_THRESHOLD:
+        response_text = context_faq
+        provider = "retrieval_high_confidence"
+    # Cas B : Passage au LLM
+    else:
+        system_prompt = f"""Tu es un assistant support client utile et précis.
+
+CONTEXTE FAQ (Peut être vide ou peu pertinent, score={confidence:.2f}) :
+"{context_faq}"
+
+HISTORIQUE :
+{history_text}
+
+INSTRUCTIONS :
+1. Utilise le CONTEXTE FAQ en priorité s'il semble répondre à la question.
+2. Si le contexte est vide ou hors-sujet, utilise tes connaissances.
+3. Réponds toujours poliment et en français.
 """
-            llm_result = await llm_orchestrator.generate_response(prompt)
+        if request.use_llm:
+            llm_result = await llm_orchestrator.generate_response(
+                f"{system_prompt}\n\nUser: {request.message}"
+            )
             
             if llm_result["status"] == "success":
                 response_text = llm_result["response"]
-                provider = llm_result["provider"]
-                confidence = 1.0 
-                
+                provider = f"llm_{llm_result['provider']}"
             else:
-                # Fallback ultime
-                response_text = rag_result["answer"] or "Désolé, je n'ai pas la réponse et mes services IA sont indisponibles."
+                response_text = context_faq or "Désolé, mes services d'IA sont indisponibles."
                 provider = "fallback_error"
+        else:
+            response_text = context_faq or "Je n'ai pas trouvé de réponse exacte."
 
     # Sauvegarde
     background_tasks.add_task(
         save_interaction_task, db, request.user_id, request.message, response_text, confidence, provider
     )
+    is_retrieval = provider in ["retrieval_high_confidence", "static_rule", "retrieval_only"]
 
     return ChatResponse(
         response=response_text,
         confidence=confidence,
         provider=provider,
         matched_question=matched_q,
-        retrieval_only=(provider == "retrieval_only" or provider == "static_rule"),
-        is_new_question=(rag_result["confidence"] < 0.45 and provider != "static_rule") # On marque comme "new" seulement si ce n'est pas un "Bonjour"
+        retrieval_only=is_retrieval,
+        is_new_question=(confidence < settings.CONFIDENCE_THRESHOLD) 
     )
 
 @router.get("/llm/status")

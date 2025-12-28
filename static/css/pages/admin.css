@@ -15,6 +15,7 @@ body {
   flex-direction: column;
   padding: 24px;
   height: 100vh;
+  height: 100dvh; /* Mobile Viewport Fix */
 }
 .brand {
   display: flex;
@@ -77,6 +78,7 @@ body {
   padding: 32px;
   overflow-y: auto;
   height: 100vh;
+  height: 100dvh; /* Mobile Viewport Fix */
 }
 .page-header {
   display: flex;
@@ -296,6 +298,7 @@ tr:hover td {
 .form-group input,
 .form-group textarea,
 .form-group select {
+  box-sizing: border-box;
   width: 100%;
   padding: 12px;
   border: 1px solid var(--border-color);

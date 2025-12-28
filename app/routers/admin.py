@@ -1,5 +1,5 @@
-from fastapi import APIRouter, Depends, Request, Form
-from fastapi.responses import RedirectResponse
+from fastapi import APIRouter, Depends, Request, Form, HTTPException
+from fastapi.responses import RedirectResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from sqlmodel import Session, select, func
 from app.db.session import get_session
@@ -24,7 +24,7 @@ async def dashboard(
         .where(ChatInteraction.confidence < 0.45)
         .where(ChatInteraction.provider != "static_rule")
         .order_by(ChatInteraction.timestamp.desc())
-        .limit(10)
+        .limit(50) 
     ).all()
 
     stats = {
@@ -95,3 +95,72 @@ async def delete_faq(
 async def get_stats_json(db: Session = Depends(get_session), current_user = Depends(get_current_admin_user)):
     total = db.exec(select(func.count(ChatInteraction.id))).one()
     return {"total_messages": total}
+
+@router.post("/questions/convert-to-faq/{interaction_id}")
+async def convert_question_to_faq(
+    interaction_id: int,
+    question: str = Form(None),
+    answer: str = Form(None),
+    category: str = Form("general"),
+    db: Session = Depends(get_session),
+    current_user = Depends(get_current_admin_user)
+):
+    interaction = db.get(ChatInteraction, interaction_id)
+    if not interaction:
+        raise HTTPException(status_code=404, detail="Interaction not found")
+    
+    faq_question = question if question else interaction.message
+    faq_answer = answer if answer else interaction.response
+    
+    existing = db.exec(
+        select(FAQItem).where(FAQItem.question == faq_question)
+    ).first()
+    
+    if existing:
+        return JSONResponse(
+            status_code=400,
+            content={"message": "This question already exists in FAQ", "faq_id": existing.id}
+        )
+    
+    new_faq = FAQItem(
+        question=faq_question,
+        answer=faq_answer,
+        category=category
+    )
+    db.add(new_faq)
+    db.commit()
+    db.refresh(new_faq)
+    
+    try:
+        RAGService().reload_from_db(db)
+    except Exception as e:
+        print(f"Error reloading ChromaDB: {e}")
+    
+    return JSONResponse(
+        status_code=200,
+        content={
+            "message": "Question added to FAQ successfully",
+            "faq_id": new_faq.id,
+            "question": new_faq.question
+        }
+    )
+
+@router.get("/questions/{interaction_id}")
+async def get_question_details(
+    interaction_id: int,
+    db: Session = Depends(get_session),
+    current_user = Depends(get_current_admin_user)
+):
+    interaction = db.get(ChatInteraction, interaction_id)
+    if not interaction:
+        raise HTTPException(status_code=404, detail="Interaction not found")
+    
+    return {
+        "id": interaction.id,
+        "message": interaction.message,
+        "response": interaction.response,
+        "confidence": interaction.confidence,
+        "provider": interaction.provider,
+        "timestamp": interaction.timestamp.isoformat(),
+        "user_session_id": interaction.user_session_id
+    }

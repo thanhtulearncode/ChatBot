@@ -7,13 +7,28 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      # ON MONTE TOUT LE DOSSIER DATA (plus sûr)
       - ./data:/app/data
-      # Persistance du cache
       - ./cache:/app/cache
     env_file:
       - .env
     environment:
-      # On pointe la DB à l'intérieur du dossier data
       - DATABASE_URL=sqlite:////app/data/chatbot_production.db
+      - CHROMA_DB_HOST=chromadb
+      - CHROMA_DB_PORT=8000
+    depends_on:
+      - chromadb
     restart: unless-stopped
+
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: chatbot_chroma_db
+    ports:
+      - "8001:8000"
+    volumes:
+      - chroma_data:/chroma/chroma
+    environment:
+      - IS_PERSISTENT=TRUE
+    restart: unless-stopped
+
+volumes:
+  chroma_data:

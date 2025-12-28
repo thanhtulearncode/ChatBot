@@ -18,6 +18,11 @@ class Settings(BaseSettings):
     EMBEDDING_MODEL: str = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
     FAQ_JSON_PATH: str = "data/faq.json"
     CONFIDENCE_THRESHOLD: float = 0.45
+    DIRECT_ANSWER_THRESHOLD: float = 0.75
+    # Config Chroma
+    CHROMA_DB_HOST: str = "chromadb"
+    CHROMA_DB_PORT: int = 8000
+    CHROMA_COLLECTION_NAME: str = "faq_collection"
     model_config = SettingsConfigDict(
         env_file=".env", 
         case_sensitive=True,

@@ -50,6 +50,8 @@
   outline: none;
   resize: none;
   font-family: inherit;
+  max-height: 120px;
+  overflow-y: auto;
 }
 
 .message-input::placeholder {

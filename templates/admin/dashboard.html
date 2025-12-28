@@ -1,4 +1,7 @@
-{% extends "admin/base.html" %} {% block admin_content %}
+{% extends "admin/base.html" %} {% block extra_css %}
+<link rel="stylesheet" href="/static/css/pages/admin.css" />
+<link rel="stylesheet" href="/static/css/pages/dashboard.css" />
+{% endblock %} {% block admin_content %}
 <h1>Tableau de Bord</h1>
 
 <div class="stats-grid">
@@ -7,18 +10,24 @@
       <h3>Total Interactions</h3>
       <div class="stat-value">{{ stats['total_messages'] }}</div>
     </div>
-    <div
-      class="stat-icon"
-      style="background: rgba(99, 102, 241, 0.1); color: var(--primary)"
-    >
-      💬
+    <div class="stat-icon stat-icon-primary">💬</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-info">
+      <h3>Questions à revoir</h3>
+      <div class="stat-value">{{ stats['missed_questions_count'] }}</div>
     </div>
+    <div class="stat-icon stat-icon-warning">⚠️</div>
   </div>
 </div>
 
 <div class="table-container">
   <div class="table-header">
     <h2>🔍 Questions à faible confiance</h2>
+    <p>
+      Passez en revue ces questions et convertissez-les en FAQ pour améliorer le
+      chatbot
+    </p>
   </div>
   {% if stats['recent_missed'] %}
   <table>
@@ -28,23 +37,195 @@
         <th>Question</th>
         <th>Réponse</th>
         <th>Confiance</th>
+        <th>Provider</th>
+        <th>Actions</th>
       </tr>
     </thead>
     <tbody>
       {% for item in stats['recent_missed'] %}
-      <tr>
+      <tr id="row-{{ item.id }}">
         <td>{{ item.timestamp.strftime('%d/%m %H:%M') }}</td>
-        <td>{{ item.message }}</td>
-        <td>{{ item.response }}</td>
+        <td><strong>{{ item.message }}</strong></td>
+        <td class="table-cell-truncate">
+          {{ item.response[:100] }}{% if item.response|length > 100 %}...{%
+          endif %}
+        </td>
         <td>
           <span class="badge badge-low"
             >{{ (item.confidence * 100)|round }}%</span
           >
         </td>
+        <td>
+          <span class="badge badge-provider"> {{ item.provider }} </span>
+        </td>
+        <td class="table-cell-actions">
+          <button
+            class="btn btn-sm btn-primary"
+            onclick="reviewQuestion({{ item.id }})"
+            aria-label="Revoir la question {{ item.id }}"
+            type="button"
+          >
+            <span aria-hidden="true">👁️</span> Revoir
+          </button>
+          <button
+            class="btn btn-sm btn-success"
+            onclick="convertToFAQQuick({{ item.id }})"
+            aria-label="Ajouter la question {{ item.id }} à la FAQ"
+            type="button"
+          >
+            <span aria-hidden="true">➕</span> Ajouter FAQ
+          </button>
+        </td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
+  {% else %}
+  <div class="empty-state">
+    <p>✅ Aucune question à faible confiance pour le moment !</p>
+  </div>
   {% endif %}
 </div>
+
+<div id="reviewModal" class="modal" style="display: none">
+  <div class="modal-content modal-content-large">
+    <div class="modal-header">
+      <h2>📝 Revoir et convertir en FAQ</h2>
+      <span class="close" onclick="closeReviewModal()">&times;</span>
+    </div>
+    <div class="modal-body">
+      <form id="reviewForm">
+        <input type="hidden" id="review_interaction_id" name="interaction_id" />
+
+        <div class="form-group">
+          <label for="review_question"> Question: </label>
+          <textarea
+            id="review_question"
+            name="question"
+            rows="2"
+            required
+          ></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="review_answer"> Réponse: </label>
+          <textarea
+            id="review_answer"
+            name="answer"
+            rows="5"
+            required
+          ></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="review_category"> Catégorie: </label>
+          <select id="review_category" name="category">
+            <option value="general">Général</option>
+            <option value="technical">Technique</option>
+            <option value="billing">Facturation</option>
+            <option value="support">Support</option>
+            <option value="product">Produit</option>
+          </select>
+        </div>
+
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            onclick="closeReviewModal()"
+          >
+            Annuler
+          </button>
+          <button type="submit" class="btn btn-primary">
+            ✅ Ajouter à la FAQ
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  let currentInteractionId = null;
+
+  function reviewQuestion(interactionId) {
+    currentInteractionId = interactionId;
+    const modal = document.getElementById("reviewModal");
+    modal.style.display = "block";
+
+    fetch(`/admin/questions/${interactionId}`)
+      .then((response) => response.json())
+      .then((data) => {
+        document.getElementById("review_interaction_id").value = data.id;
+        document.getElementById("review_question").value = data.message;
+        document.getElementById("review_answer").value = data.response;
+        document.getElementById("review_category").value = "general";
+      })
+      .catch((error) => {
+        console.error("Erreur lors du chargement:", error);
+        alert("Erreur lors du chargement des détails de la question");
+      });
+  }
+
+  function closeReviewModal() {
+    document.getElementById("reviewModal").style.display = "none";
+    currentInteractionId = null;
+  }
+
+  function convertToFAQQuick(interactionId) {
+    reviewQuestion(interactionId);
+  }
+
+  document
+    .getElementById("reviewForm")
+    .addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const formData = new FormData(this);
+      const interactionId = formData.get("interaction_id");
+
+      try {
+        const response = await fetch(
+          `/admin/questions/convert-to-faq/${interactionId}`,
+          {
+            method: "POST",
+            body: formData,
+          }
+        );
+
+        const result = await response.json();
+
+        if (response.ok) {
+          alert("✅ Question ajoutée à la FAQ avec succès !");
+          closeReviewModal();
+          const row = document.getElementById(`row-${interactionId}`);
+          if (row) {
+            row.style.opacity = "0.5";
+            row.style.textDecoration = "line-through";
+            const actionsCell = row.querySelector("td:last-child");
+            if (actionsCell) {
+              actionsCell.innerHTML =
+                '<span class="status-added">✅ Ajoutée à la FAQ</span>';
+            }
+          }
+        } else {
+          alert(
+            `Erreur: ${
+              result.message || "Impossible d'ajouter la question à la FAQ"
+            }`
+          );
+        }
+      } catch (error) {
+        console.error("Erreur:", error);
+        alert("Erreur lors de l'ajout à la FAQ");
+      }
+    });
+
+  window.onclick = function (event) {
+    const modal = document.getElementById("reviewModal");
+    if (event.target == modal) {
+      closeReviewModal();
+    }
+  };
+</script>
 {% endblock %}

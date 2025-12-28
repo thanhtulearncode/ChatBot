@@ -7,7 +7,126 @@
 <link rel="stylesheet" href="/static/css/components/input-area.css" />
 <link rel="stylesheet" href="/static/css/components/typing-indicator.css" />
 {% endblock %} {% block content %}
-<div class="main-container"></div>
+<div class="main-container">
+  <div class="chatbot-container">
+    <header class="chatbot-header">
+      <div class="header-content">
+        <div class="header-left">
+          <div class="avatar-container">
+            <div class="avatar">
+              <img src="/static/assets/chatbot.png" alt="Chatbot Avatar" />
+            </div>
+            <div id="statusIndicator" class="status-indicator"></div>
+          </div>
+          <div class="header-info">
+            <h1 class="chatbot-title">Chatbot RAG</h1>
+            <p class="chatbot-subtitle">
+              <span id="statusText">En ligne</span>
+            </p>
+          </div>
+        </div>
+        <div class="header-right">
+          <div id="llmBadge" class="llm-status">
+            <div class="status-dot"></div>
+            <span class="status-text">Chargement...</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="controls-bar">
+      <div class="control-group">
+        <div class="control-label">
+          <span class="label-text">Utiliser LLM</span>
+          <span class="label-description">Activer l'IA générative</span>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="useLLM" checked />
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="control-actions">
+        <button
+          id="clearChatBtn"
+          class="icon-button"
+          title="Effacer la conversation"
+        >
+          🗑️
+        </button>
+        <button id="settingsBtn" class="icon-button" title="Paramètres">
+          ⚙️
+        </button>
+      </div>
+    </div>
+
+    <div id="chatBox" class="chat-messages">
+      <div class="welcome-message">
+        <p class="welcome-text">
+          Je suis votre assistant intelligent. Posez-moi vos questions et je
+          ferai de mon mieux pour vous aider.
+        </p>
+
+        <div class="welcome-questions">
+          <button
+            class="suggestion-chip"
+            onclick="setInput('Comment utiliser le chatbot ?')"
+          >
+            🤔 Comment ça marche ?
+          </button>
+          <button
+            class="suggestion-chip"
+            onclick="setInput('Quels sont les modèles disponibles ?')"
+          >
+            🤖 Modèles IA
+          </button>
+          <button
+            class="suggestion-chip"
+            onclick="setInput('Comment réinitialiser mon mot de passe ?')"
+          >
+            🔑 Mot de passe
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="typingIndicator" class="typing-indicator" style="display: none">
+      <div class="typing-dots">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+      <span class="typing-text">Le chatbot écrit...</span>
+    </div>
+
+    <div class="input-container">
+      <div class="input-wrapper">
+        <textarea
+          id="userInput"
+          class="message-input"
+          placeholder="Tapez votre message ici... (Entrée pour envoyer, Shift+Entrée pour une nouvelle ligne)"
+          rows="1"
+        ></textarea>
+        <button id="sendBtn" class="send-button" title="Envoyer">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </button>
+      </div>
+      <div class="input-footer">
+        <span class="input-hint">Ctrl+K pour se concentrer</span>
+        <span id="charCounter" class="char-counter">0 / 2000</span>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %} {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="/static/js/chatbot.js"></script>

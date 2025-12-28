@@ -1,4 +1,8 @@
-const userId = "user_" + Math.random().toString(36).substr(2, 9);
+let userId = localStorage.getItem("chat_user_id");
+if (!userId) {
+  userId = "user_" + Math.random().toString(36).substr(2, 9);
+  localStorage.setItem("chat_user_id", userId);
+}
 let isTyping = false;
 let failedMessages = new Map(); // Store failed messages for retry
 const MAX_MESSAGE_LENGTH = 2000;
@@ -40,6 +44,11 @@ function setupEventListeners() {
   });
   // Character counter
   userInput.addEventListener("input", updateCharacterCounter);
+  // Auto-resize textarea
+  userInput.addEventListener("input", () => {
+    userInput.style.height = "auto";
+    userInput.style.height = Math.min(userInput.scrollHeight, 120) + "px";
+  });
   // Focus input when clicking on chat area
   document.getElementById("chatBox").addEventListener("click", () => {
     userInput.focus();
@@ -169,7 +178,12 @@ function addMessage(content, isUser, metadata = {}, messageId = null) {
   messageContentContainer.style.position = "relative";
   const messageContent = document.createElement("div");
   messageContent.className = "message-content";
-  messageContent.textContent = content;
+  if (isUser) {
+    messageContent.textContent = content;
+  } else {
+    messageContent.innerHTML = formatMessageContent(content);
+    messageContent.classList.add("markdown-body");
+  }
   messageContentContainer.appendChild(messageContent);
   // Message actions (copy button)
   if (!isUser) {
@@ -250,6 +264,15 @@ function addMessage(content, isUser, metadata = {}, messageId = null) {
   chatBox.appendChild(messageDiv);
   // Smooth scroll to bottom
   scrollToBottom();
+  if (metadata.matched_question) {
+    const sourceDiv = document.createElement("div");
+    sourceDiv.className = "message-source";
+    sourceDiv.innerHTML = `
+    <span class="source-icon">📄</span>
+    <span class="source-text">Source: "${metadata.matched_question}"</span>
+  `;
+    contentWrapper.appendChild(sourceDiv);
+  }
 }
 /**
  * Show typing indicator
@@ -333,6 +356,7 @@ async function handleSendMessage() {
       confidence: data.confidence,
       provider: data.provider,
       retrieval_only: data.retrieval_only,
+      matched_question: data.matched_question,
     });
     // Show notification for new questions
     if (data.is_new_question) {
@@ -371,14 +395,31 @@ function clearChat() {
   const welcomeMessage = `
     <div class="welcome-message">
       <div class="welcome-icon">
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-        </svg>
-      </div>
+        </div>
       <h2 class="welcome-title">Conversation effacée 💬</h2>
       <p class="welcome-text">
         Comment puis-je vous aider aujourd'hui ?
       </p>
+      <div class="welcome-questions">
+        <button
+          class="suggestion-chip"
+          onclick="setInput('Comment utiliser le chatbot ?')"
+        >
+          🤔 Comment ça marche ?
+        </button>
+        <button
+          class="suggestion-chip"
+          onclick="setInput('Quels sont les modèles disponibles ?')"
+        >
+          🤖 Modèles IA
+        </button>
+        <button
+          class="suggestion-chip"
+          onclick="setInput('Comment réinitialiser mon mot de passe ?')"
+        >
+          🔑 Mot de passe
+        </button>
+      </div>
     </div>
   `;
   chatBox.innerHTML = welcomeMessage;
@@ -654,12 +695,24 @@ async function clearServerHistory() {
  * Format message content (for future markdown support)
  */
 function formatMessageContent(content) {
-  // Future: Add markdown parsing, link detection, etc.
+  // Check if 'marked' library is loaded
+  if (typeof marked !== "undefined") {
+    // Configure marked to break on single newlines
+    marked.setOptions({ breaks: true });
+    return marked.parse(content);
+  }
   return content;
 }
+function setInput(text) {
+  const userInput = document.getElementById("userInput");
+  userInput.value = text;
+  userInput.focus();
+}
 // Make functions globally accessible for onclick handlers
+window.setInput = setInput;
 window.exportChatHistory = exportChatHistory;
 window.clearServerHistory = clearServerHistory;
+
 // Export functions for potential external use
 if (typeof module !== "undefined" && module.exports) {
   module.exports = {

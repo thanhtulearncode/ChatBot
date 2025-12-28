@@ -1,9 +1,19 @@
+import sys
+from unittest.mock import MagicMock
+
+mock_chroma = MagicMock()
+mock_chroma.HttpClient.return_value = MagicMock()  # Returns a fake client
+sys.modules["chromadb"] = mock_chroma
+
+mock_st = MagicMock()
+mock_st.SentenceTransformer.return_value = MagicMock()
+sys.modules["sentence_transformers"] = mock_st
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import Session, SQLModel, create_engine, pool
 from app.main import app
 from app.db.session import get_session
-from app.services.llm_factory import LLMOrchestrator
 
 TEST_DATABASE_URL = "sqlite:///:memory:"
 engine = create_engine(
